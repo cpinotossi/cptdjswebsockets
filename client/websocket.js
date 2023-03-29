@@ -1,8 +1,9 @@
 var game = new Phaser.Game(800, 500, Phaser.AUTO, 'phaser', { preload: preload, create: create});
 var myText = null;
 var sprite = null;
-var wsh = document.getElementById('websocket').getAttribute('data-wshost');
-console.count(wsh)
+var wshost = document.getElementById('websocket').getAttribute('data-wshost');
+var wsport = document.getElementById('websocket').getAttribute('data-wsport');
+console.count(wshost+":"+wsport)
 
 function preload() {
     game.load.image("azLogo", "azure.logo.png");
@@ -32,8 +33,8 @@ function Client() {
 }
 
 Client.prototype.openConnection = function() {
-    console.count("try connect: ws://"+wsh+":8080")
-    this.ws = new WebSocket("ws://"+wsh+":8080");
+    console.count("try connect: ws://"+wshost+":"+wsport)
+    this.ws = new WebSocket("ws://"+wshost+":"+wsport);
     this.connected = false;
     // this.ws.on('close', this.connectionClose.bind(this));
     // this.ws.on('open', function open() {
