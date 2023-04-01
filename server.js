@@ -4,6 +4,7 @@ const pug = require('pug');
 let args=process.argv;
 const hostname = args.length>2 ? args[2] : process.env.HOSTNAME;
 const httpPort = args.length>3 ? args[3] : process.env.HTTPPORT;
+const bgcolor = args.length>3 ? args[4] : process.env.BGCOLOR;
 
 const fs = require('fs').promises;
 const http = require('http');
@@ -21,7 +22,8 @@ HttpServer.on('request', (req, res) => {
             res.writeHead(200);
             res.end(compiledFunction({
                 hostname: hostname,
-                port: httpPort
+                port: httpPort,
+                bgcolor: bgcolor
             }));
             break;
         default:
@@ -40,7 +42,7 @@ HttpServer.on('request', (req, res) => {
 
 var WebSocket = require('ws');
 // console.log(`WebSocket Server started on port ${wsPort}`);
-var rabbit = { x: 0, y: 0 };
+var sprite = { x: 0, y: 0 };
 // wss = new WebSocket.Server({ port: wsPort });
 wss = new WebSocket.Server({ server: HttpServer });
 wss.on('connection', function (ws) {
@@ -48,15 +50,16 @@ wss.on('connection', function (ws) {
     ws.on('message', function message(message) {
         console.log('received: %s', message);
         var incommingMsg = JSON.parse(message);
-        rabbit.x = incommingMsg.x;
-        rabbit.y = incommingMsg.y;
+        sprite.x = incommingMsg.x;
+        sprite.y = incommingMsg.y;
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(rabbit));
+                console.log('send: %s', message);
+                client.send(JSON.stringify(sprite));
             }
         });
     });
-    ws.send(JSON.stringify(rabbit));
+    ws.send(JSON.stringify(sprite));
 });
 
 HttpServer.listen(httpPort, () => {
