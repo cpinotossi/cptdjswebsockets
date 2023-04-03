@@ -39,6 +39,9 @@ Client.prototype.openConnection = function() {
     console.count("try connect: ws://"+wshost+":"+wsport)
     this.ws = new WebSocket("ws://"+wshost+":"+wsport);
     this.connected = false;
+    this.conncetionStartDate = null;
+    this.conncetionEndDate = null;
+    this.conncetionDuration = null;
     // this.connected = true;
 
     // this.ws.on('close', this.connectionClose.bind(this));
@@ -54,13 +57,17 @@ Client.prototype.openConnection = function() {
 
 Client.prototype.connectionClose = function() {
     this.connected = false;
-    console.log('Websocket: disconnected');
+    this.conncetionEndDate = new Date(Date.now());
+    this.conncetionDuration = this.conncetionEndDate - this.conncetionStartDate;
+    console.log('Websocket: disconnected: '+ this.conncetionEndDate.toUTCString());
+    console.log('Websocket: connection duration: '+ this.conncetionDuration/1000/60 + ' min');
     myText.text = 'disconnected\n';
 };
 
 Client.prototype.connectionOpen = function() {
     this.connected = true;
-    console.log('Websocket: connected:'+ Date.now());
+    this.conncetionStartDate = new Date(Date.now());
+    console.log('Websocket: connected: '+ this.conncetionStartDate.toUTCString());
     myText.text = 'connected\n';
 };
 
