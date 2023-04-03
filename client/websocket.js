@@ -28,7 +28,7 @@ function create() {
 function azLogoDragged() {
     if (this.client.connected) {
         console.log(JSON.stringify({x: sprite.x, y: sprite.y}))
-        this.client.ws.send(JSON.stringify({x: sprite.x, y: sprite.y}));
+        this.client.ws.send(JSON.stringify({x: sprite.x, y: sprite.y, isPosition: true}));
     }
 }
 
@@ -55,6 +55,13 @@ Client.prototype.openConnection = function() {
     this.ws.onclose = this.connectionClose.bind(this);
 };
 
+Client.prototype.keepAliveCall = function sendKeepAliveMessage() {
+    if (this.connected) {
+        // console.log('keep alive call')
+        this.ws.send(JSON.stringify({isPosition: false}));
+    }
+}
+
 Client.prototype.connectionClose = function() {
     this.connected = false;
     this.conncetionEndDate = new Date(Date.now());
@@ -69,6 +76,8 @@ Client.prototype.connectionOpen = function() {
     this.conncetionStartDate = new Date(Date.now());
     console.log('Websocket: connected: '+ this.conncetionStartDate.toUTCString());
     myText.text = 'connected\n';
+    // We need to keep sending messages otherwise Azure Application Gateway will disconnect after 50sec.
+    setInterval(() => this.keepAliveCall(), 20000); // We need to use Arrow => to be able to use this with setInterval.
 };
 
 Client.prototype.onMessage = function(message) {

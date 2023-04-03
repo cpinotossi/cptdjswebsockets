@@ -19,7 +19,7 @@ git remote add origin https://github.com/cpinotossi/$prefix.git
 git status
 git add .gitignore
 git add *
-git commit -m"merge into one port"
+git commit -m"add websocket duration logging in console"
 git push origin main
 git push --recurse-submodules=on-demand
 git rm README.md # unstage
@@ -30,3 +30,5 @@ git merge
 origin main
 git config pull.rebase false
 ~~~
+
+

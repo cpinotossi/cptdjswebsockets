@@ -50,14 +50,19 @@ wss.on('connection', function (ws) {
     ws.on('message', function message(message) {
         console.log('received: %s', message);
         var incommingMsg = JSON.parse(message);
-        sprite.x = incommingMsg.x;
-        sprite.y = incommingMsg.y;
-        wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                console.log('send: %s', message);
-                client.send(JSON.stringify(sprite));
-            }
-        });
+        if(incommingMsg.isPosition){
+            sprite.x = incommingMsg.x;
+            sprite.y = incommingMsg.y;
+            wss.clients.forEach(function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    console.log('send: %s', message);
+                    client.send(JSON.stringify(sprite));
+                }
+            });
+        }
+        else{
+            console.log('send: %s', message);
+        }
     });
     ws.send(JSON.stringify(sprite));
 });
