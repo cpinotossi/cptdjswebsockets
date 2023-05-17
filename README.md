@@ -25,7 +25,7 @@ git remote add origin https://github.com/cpinotossi/$prefix.git
 git status
 git add .gitignore
 git add *
-git commit -m"add green blue health switch"
+git commit -m"add cookie support"
 git push origin main
 git push --recurse-submodules=on-demand
 git rm README.md # unstage
