@@ -16,14 +16,22 @@ const url = require('url');
 HttpServer.on('request', (req, res) => {
     let rc = 0;
     console.log(`ra:${req.socket.remoteAddress},rp:${req.socket.remotePort},${req.url}`);
-    switch (req.url) {
+    console.log(`req.headers.cookie ${req.headers.cookie}`);
+    switch (`req.url`) {
         case '/index.html':
+            // const cookies = parseCookies(req);
+            let cookies = parseCookies( req.headers.cookie );
             // Compile the source code
             const compiledFunction = pug.compileFile('client/index.html');
             // Render a set of data
             // console.log();
-            res.setHeader("Content-Type", "text/html");
-            res.writeHead(200);
+            // res.setHeader("Content-Type", "text/html");
+            // res.setHeader('Set-Cookie', 'mycookie=test'),
+            // res.writeHead(200);
+            res.writeHead( 200, {
+                'Set-Cookie': stringifyCookies(cookies),
+                'Content-Type': 'text/html'
+              } );
             res.end(compiledFunction({
                 hostname: hostname,
                 port: httpPort,
@@ -101,6 +109,37 @@ wss.on('connection', function (ws) {
     });
     ws.send(JSON.stringify(sprite));
 });
+
+function parseCookies_ (request) {
+    const list = {};
+    const cookieHeader = request.headers?.cookie;
+    if (!cookieHeader) return list;
+
+    cookieHeader.split(`;`).forEach(function(cookie) {
+        let [ name, ...rest] = cookie.split(`=`);
+        name = name?.trim();
+        if (!name) return;
+        const value = rest.join(`=`).trim();
+        if (!value) return;
+        list[name] = decodeURIComponent(value);
+    });
+
+    return list;
+}
+
+function parseCookies(str) {
+    let rx = /([^;=\s]*)=([^;]*)/g;
+    let obj = { };
+    for ( let m ; m = rx.exec(str) ; )
+      obj[ m[1] ] = decodeURIComponent( m[2] );
+    return obj;
+  }
+  
+  function stringifyCookies(cookies) {
+    return Object.entries( cookies )
+      .map( ([k,v]) => k + '=' + encodeURIComponent(v) )
+      .join( '; ');
+  }
 
 HttpServer.listen(httpPort, () => {
     console.log(`HTTP Server started on port ${httpPort} with hostname ${hostname}, env ${env}, bgcolor ${bgcolor}`);
