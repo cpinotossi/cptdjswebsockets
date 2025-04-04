@@ -12,6 +12,7 @@ const http = require('http');
 const HttpServer = http.createServer();
 const HealthHTTPResponseCode = 200;
 const url = require('url');
+const path = require('path');
 
 HttpServer.on('request', (req, res) => {
     let rc = 0;
@@ -80,13 +81,19 @@ HttpServer.on('request', (req, res) => {
             }));
             break;
         default:
-            fs.readFile(__dirname + "/client" + req.url).then(contents => {
+            fs.stat(path.join(__dirname, "/client", req.url)).then(stats => {
+                if (stats.isFile()) {
+                    return fs.readFile(path.join(__dirname, "/client", req.url));
+                } else {
+                    throw new Error("Requested path is not a file");
+                }
+            }).then(contents => {
                 res.setHeader("Content-Type", "text/html");
                 res.writeHead(200);
                 res.end(contents);
             }).catch(err => {
                 res.writeHead(500);
-                res.end(err);
+                res.end(err.toString()); // Convert the error to a string
                 return;
             });
             break;
